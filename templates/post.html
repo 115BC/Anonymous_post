@@ -2,7 +2,7 @@
 {% block title %}{{ post.title }}{% endblock %}
 {% block content %}
 <div class="post" style="box-shadow:none">
-  <h1>{{ post.title }}</h1>
+  <h1>{{ post.title }} {% if post.is_history %}<span class="badge">历史</span>{% endif %}</h1>
   <div class="meta">
     分类：{{ post.category or '未分类' }} | {{ post.created_at }}
     {% if session.role in ['admin','superadmin'] %}| 作者：{{ post.author }}{% endif %}
@@ -10,24 +10,129 @@
   {% if post.image_path %}<img class="post-img" src="{{ url_for('static', filename=post.image_path) }}">{% endif %}
   <div class="body">{{ post.body }}</div>
 
-  <h2 style="margin-top:24px">回复（仅管理员可回复）</h2>
-  {% for r in replies %}
-    <div class="reply"><b>{{ r.admin_name }}</b>（{{ r.created_at }}）：{{ r.body }}</div>
-  {% else %}
-    <p class="empty">暂无回复。</p>
-  {% endfor %}
-  {% if session.role in ['admin','superadmin'] %}
-    <form method="post" action="/post/{{ post.id }}/reply" style="margin-top:12px">
-      <textarea name="body" placeholder="以管理员身份回复…" required></textarea>
-      <button>回复</button>
-    </form>
-  {% endif %}
-
   <div class="actions" style="margin-top:16px">
     {% if post.user_id == session.user_id or session.role in ['admin','superadmin'] %}
-      <a href="/post/{{ post.id }}/edit">编辑帖子</a>
+      <button type="button" onclick="openEditModal()">编辑帖子</button>
+      <form method="post" action="/post/{{ post.id }}/history" style="display:inline">
+        <button type="submit">{{ '从历史恢复' if post.is_history else '移入历史' }}</button>
+      </form>
+      <form method="post" action="/post/{{ post.id }}/delete" style="display:inline" onsubmit="return confirm('确认删除该帖？');">
+        <button class="danger" type="submit">删除</button>
+      </form>
     {% endif %}
     <a href="/">← 返回列表</a>
   </div>
 </div>
+
+<!-- 评论 -->
+<section class="comments">
+  <h2>评论（{{ comment_total }}）</h2>
+
+  {% if can_comment %}
+  <form method="post" action="/post/{{ post.id }}/comment" class="comment-main">
+    <textarea name="body" placeholder="写下你的评论…" required></textarea>
+    <button type="submit">发布评论</button>
+  </form>
+  {% endif %}
+
+  {% if top %}
+    {% for c in top %}
+      <div class="comment" id="c{{ c.id }}">
+        <div class="comment-head">
+          <b>{{ c.author }}</b>
+          {% if c.author_role in ['admin','superadmin'] %}<span class="role">{{ c.author_role }}</span>{% endif %}
+          <span class="ctime">{{ c.created_at }}</span>
+        </div>
+        <div class="cbody">{{ c.body }}</div>
+        <div class="cactions">
+          {% if can_comment %}
+            <button type="button" class="linkbtn" onclick="toggle('rf-{{ c.id }}')">回复</button>
+          {% endif %}
+          {% if session.role in ['admin','superadmin'] or c.user_id == session.user_id %}
+            <form method="post" action="/comment/{{ c.id }}/delete" style="display:inline"
+                  onsubmit="return confirm('确认删除该评论及其回复？');">
+              <button class="danger linkbtn" type="submit">删除</button>
+            </form>
+          {% endif %}
+        </div>
+        {% if can_comment %}
+        <form method="post" action="/post/{{ post.id }}/comment" id="rf-{{ c.id }}" class="reply-form" style="display:none">
+          <input type="hidden" name="parent_id" value="{{ c.id }}">
+          <textarea name="body" placeholder="回复 {{ c.author }} …" required></textarea>
+          <button type="submit">回复</button>
+        </form>
+        {% endif %}
+      </div>
+      <div class="replies">
+        {% for r in children.get(c.id, []) %}
+        <div class="comment" id="c{{ r.id }}">
+          <div class="comment-head">
+            <b>{{ r.author }}</b>
+            {% if r.author_role in ['admin','superadmin'] %}<span class="role">{{ r.author_role }}</span>{% endif %}
+            <span class="ctime">{{ r.created_at }}</span>
+          </div>
+          <div class="cbody">{{ r.body }}</div>
+          <div class="cactions">
+            {% if can_comment %}
+              <button type="button" class="linkbtn" onclick="toggle('rf-{{ r.id }}')">回复</button>
+            {% endif %}
+            {% if session.role in ['admin','superadmin'] or r.user_id == session.user_id %}
+              <form method="post" action="/comment/{{ r.id }}/delete" style="display:inline"
+                    onsubmit="return confirm('确认删除该评论及其回复？');">
+                <button class="danger linkbtn" type="submit">删除</button>
+              </form>
+            {% endif %}
+          </div>
+          {% if can_comment %}
+          <form method="post" action="/post/{{ post.id }}/comment" id="rf-{{ r.id }}" class="reply-form" style="display:none">
+            <input type="hidden" name="parent_id" value="{{ r.id }}">
+            <textarea name="body" placeholder="回复 {{ r.author }} …" required></textarea>
+            <button type="submit">回复</button>
+          </form>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="empty">暂无评论。</p>
+  {% endif %}
+</section>
+
+<!-- 编辑弹窗 -->
+{% if post.user_id == session.user_id or session.role in ['admin','superadmin'] %}
+<div id="edit-modal" class="modal" style="display:none">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2 style="margin:0">编辑帖子</h2>
+      <button class="x" type="button" onclick="closeEditModal()">×</button>
+    </div>
+    <form method="post" action="/post/{{ post.id }}/edit">
+      <label>标题<input name="title" value="{{ post.title }}" required></label>
+      <label>分区（必选）
+        <select name="category_id" required>
+          {% for c in categories %}
+            <option value="{{ c.id }}" {% if c.id == post.category_id %}selected{% endif %}>{{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>内容<textarea name="body" required>{{ post.body }}</textarea></label>
+      <div class="modal-actions">
+        <button type="button" class="ghost" onclick="closeEditModal()">取消</button>
+        <button type="submit">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+<script>
+function openEditModal(){ document.getElementById('edit-modal').style.display='flex'; }
+function closeEditModal(){ document.getElementById('edit-modal').style.display='none'; }
+function toggle(id){ var el=document.getElementById(id); el.style.display = (el.style.display==='none'||!el.style.display)?'block':'none'; }
+window.addEventListener('click', function(e){
+  var m=document.getElementById('edit-modal');
+  if(e.target===m) closeEditModal();
+});
+</script>
 {% endblock %}

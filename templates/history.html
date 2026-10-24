@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block title %}历史帖子{% endblock %}
+{% block content %}
+<div class="head">
+  <h1>历史帖子</h1>
+  <a class="btn" href="/">← 返回首页</a>
+</div>
+<p class="meta">这里存放你移入历史的本人的帖子，可随时恢复。</p>
+{% if posts %}
+  {% for p in posts %}
+  <div class="post">
+    <h3><a href="/post/{{ p.id }}">{{ p.title }}</a> <span class="badge">历史</span></h3>
+    <div class="meta">
+      分类：{{ p.category or '未分类' }} | {{ p.created_at }}
+      | 评论 {{ counts.get(p.id, 0) }}
+      {% if session.role in ['admin','superadmin'] %}| 作者：{{ p.author }}{% endif %}
+    </div>
+    <p class="body">{{ p.body[:120] }}{% if p.body|length > 120 %}…{% endif %}</p>
+    <div class="actions">
+      <a href="/post/{{ p.id }}">查看</a>
+      <form method="post" action="/post/{{ p.id }}/history" style="display:inline">
+        <button type="submit">从历史恢复</button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+{% else %}
+  <p class="empty">历史帖子为空。</p>
+{% endif %}
+{% endblock %}

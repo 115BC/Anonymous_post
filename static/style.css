@@ -31,3 +31,50 @@ textarea { min-height:100px; resize:vertical; }
 section { background:#fff; border-radius:10px; padding:16px; margin-bottom:14px; }
 label { display:block; font-size:13px; color:#374151; margin-top:6px; }
 ul { padding-left:18px; }
+
+/* 单栏认证页（登录/注册/重置） */
+.auth-single { max-width:420px; margin:24px auto; }
+.hint { font-size:13px; color:#6b7280; margin:4px 0 12px; }
+.hint a { color:#2563eb; }
+
+/* 弹窗 */
+.modal { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:flex-start; justify-content:center; padding:40px 16px; z-index:50; overflow:auto; }
+.modal-box { background:#fff; border-radius:12px; width:100%; max-width:520px; padding:20px; box-shadow:0 10px 40px rgba(0,0,0,.25); }
+.modal-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.modal-head .x { background:none; border:none; font-size:24px; color:#6b7280; cursor:pointer; line-height:1; padding:0 4px; }
+.modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:8px; }
+button.ghost { background:#e5e7eb; color:#111; }
+button.linkbtn { background:none; border:none; color:#2563eb; padding:2px 4px; font-size:13px; }
+button.danger.linkbtn { color:#dc2626; }
+
+/* 密码强度弹窗 */
+.pw-wrap { position:relative; }
+.pw-pop { position:absolute; left:0; top:100%; margin-top:6px; z-index:20; background:#fff; border:1px solid #d1d5db; border-radius:8px; padding:10px 12px; min-width:200px; box-shadow:0 6px 20px rgba(0,0,0,.12); font-size:13px; }
+.pw-title { color:#374151; margin-bottom:4px; font-weight:600; }
+.pw-item { color:#dc2626; line-height:1.7; }
+.pw-item.ok { color:#16a34a; }
+
+/* 徽标 */
+.badge { display:inline-block; background:#e5e7eb; color:#374151; font-size:12px; padding:1px 8px; border-radius:999px; vertical-align:middle; }
+.badge.banned { background:#fee2e2; color:#b91c1c; }
+.role { display:inline-block; background:#dbeafe; color:#1d4ed8; font-size:11px; padding:1px 7px; border-radius:999px; margin-left:6px; vertical-align:middle; }
+
+/* 评论 */
+.comments { background:#fff; border-radius:10px; padding:16px; margin-top:14px; }
+.comment-main textarea { min-height:70px; }
+.comment { border-top:1px solid #eee; padding:10px 0; }
+.comments > .comment:first-of-type { border-top:none; }
+.comment-head { font-size:14px; }
+.ctime { color:#9ca3af; font-size:12px; margin-left:8px; }
+.cbody { white-space:pre-wrap; line-height:1.6; margin:6px 0; }
+.cactions { font-size:13px; }
+.replies { margin-left:22px; border-left:2px solid #eef; padding-left:12px; }
+.reply-form { margin:8px 0 4px; }
+.reply-form textarea { min-height:56px; }
+
+/* 用户管理 */
+.user-row { display:flex; flex-direction:column; gap:12px; }
+.user-main { display:flex; gap:14px; align-items:center; }
+.user-info { flex:1; }
+.user-actions { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.user-actions form { margin:0; }

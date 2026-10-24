@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+{% block title %}用户管理{% endblock %}
+{% block content %}
+<h1>用户管理（超级管理员）</h1>
+<p class="meta">可封禁/解禁、改名、重置头像、修改权限、发送重置密码邮件。</p>
+
+{% for u in users %}
+<div class="card user-row">
+  <div class="user-main">
+    <div class="avatar">
+      {% if u.avatar %}<img src="{{ url_for('static', filename='avatars/'~u.avatar) }}">
+      {% else %}<div class="no-avatar">{{ u.username[0] }}</div>{% endif %}
+    </div>
+    <div class="user-info">
+      <div><b>#{{ u.id }} {{ u.username }}</b>
+        <span class="role">{{ u.role }}</span>
+        {% if u.status == 'banned' %}<span class="badge banned">已封禁</span>{% endif %}
+      </div>
+      <div class="meta">{{ u.email or '—' }} | 注册于 {{ u.created_at }}</div>
+    </div>
+  </div>
+
+  <div class="user-actions">
+    {% if u.role != 'superadmin' %}
+    <form method="post" action="/admin/user/{{ u.id }}/ban" style="display:inline">
+      <button type="submit" class="{{ 'ghost' if u.status=='banned' else 'danger' }}">
+        {{ '解禁' if u.status=='banned' else '封禁' }}
+      </button>
+    </form>
+    {% endif %}
+
+    <form method="post" action="/admin/user/{{ u.id }}/rename" style="display:inline-flex">
+      <input name="username" value="{{ u.username }}" style="width:130px;margin:0" required>
+      <button type="submit">改名</button>
+    </form>
+
+    <form method="post" action="/admin/user/{{ u.id }}/role" style="display:inline-flex">
+      <select name="role" style="width:120px;margin:0">
+        {% for r in ['user','admin','superadmin'] %}
+          <option value="{{ r }}" {% if r==u.role %}selected{% endif %}>{{ r }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit">改权限</button>
+    </form>
+
+    <form method="post" action="/admin/user/{{ u.id }}/avatar" style="display:inline">
+      <button type="submit" class="ghost">重置头像</button>
+    </form>
+
+    <form method="post" action="/admin/user/{{ u.id }}/reset" style="display:inline"
+          onsubmit="return confirm('为该用户生成重置密码链接？');">
+      <button type="submit" class="ghost">发送重置密码邮件</button>
+    </form>
+  </div>
+</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+{% block title %}重置密码{% endblock %}
+{% block content %}
+<div class="auth-single card">
+  {% if valid %}
+  <h2>重置密码</h2>
+  <form method="post" onsubmit="return checkReset()">
+    <div class="pw-wrap">
+      <label>新密码<input id="pw" name="password" type="password" placeholder="新密码" required
+                       autocomplete="new-password" onfocus="showPw()" oninput="checkPw()" onblur="hidePw()"></label>
+      <div id="pw-pop" class="pw-pop">
+        <div class="pw-title">密码需满足：</div>
+        <div id="pw-len" class="pw-item">至少 8 位</div>
+        <div id="pw-lower" class="pw-item">包含小写字母</div>
+        <div id="pw-upper" class="pw-item">包含大写字母</div>
+        <div id="pw-digit" class="pw-item">包含数字</div>
+      </div>
+    </div>
+    <label>确认新密码<input id="pw2" name="password2" type="password" placeholder="再次输入新密码" required
+                        autocomplete="new-password"></label>
+    <button type="submit">重置密码</button>
+  </form>
+  {% else %}
+  <h2>链接无效</h2>
+  <p class="hint">该重置链接无效或已过期，请联系管理员重新发送。</p>
+  <a class="btn" href="/login">返回登录</a>
+  {% endif %}
+</div>
+
+<script>
+function q(s){return document.querySelector(s);}
+function showPw(){ q('#pw-pop').style.display='block'; }
+function hidePw(){ setTimeout(function(){ q('#pw-pop').style.display='none'; }, 200); }
+function checkPw(){
+  var v=q('#pw').value;
+  toggle('#pw-len',   v.length>=8);
+  toggle('#pw-lower', /[a-z]/.test(v));
+  toggle('#pw-upper', /[A-Z]/.test(v));
+  toggle('#pw-digit', /[0-9]/.test(v));
+  function toggle(sel, ok){ var el=q(sel); el.classList.toggle('ok', !!ok); el.textContent = el.textContent.replace(/^[✓✗]\s*/,''); el.textContent = (ok?'✓ ':'✗ ')+el.textContent; }
+}
+function checkReset(){
+  var v=q('#pw').value;
+  if(!(v.length>=8 && /[a-z]/.test(v) && /[A-Z]/.test(v) && /[0-9]/.test(v))){
+    alert('密码需 8 位以上，且同时包含大小写字母与数字'); return false;
+  }
+  if(v!==q('#pw2').value){ alert('两次输入的密码不一致'); return false; }
+  return true;
+}
+</script>
+{% endblock %}

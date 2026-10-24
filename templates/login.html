@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block title %}登录{% endblock %}
+{% block content %}
+<div class="auth-single card">
+  <h2>登录</h2>
+  <form method="post" action="/login">
+    <label>用户名或邮箱<input name="username" placeholder="用户名或邮箱" required></label>
+    <label>密码<input name="password" type="password" placeholder="密码" required></label>
+    <button type="submit">登录</button>
+  </form>
+  <p class="hint">还没有账号？<a href="/register">去注册</a></p>
+</div>
+{% endblock %}

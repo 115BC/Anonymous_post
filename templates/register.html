@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block title %}注册{% endblock %}
+{% block content %}
+<div class="auth-single card">
+  <h2>注册</h2>
+  <p class="hint">注册需填写邮箱与邀请码</p>
+  <form method="post" action="/register" onsubmit="return checkRegister()">
+    <label>用户名<input name="username" placeholder="用户名" required></label>
+    <label>邮箱<input name="email" type="email" placeholder="邮箱" required></label>
+    <label>邀请码<input name="invite_code" placeholder="邀请码" required></label>
+
+    <div class="pw-wrap">
+      <label>密码<input id="pw" name="password" type="password" placeholder="密码" required
+                       autocomplete="new-password" onfocus="showPw()" oninput="checkPw()" onblur="hidePw()"></label>
+      <div id="pw-pop" class="pw-pop">
+        <div class="pw-title">密码需满足：</div>
+        <div id="pw-len" class="pw-item">至少 8 位</div>
+        <div id="pw-lower" class="pw-item">包含小写字母</div>
+        <div id="pw-upper" class="pw-item">包含大写字母</div>
+        <div id="pw-digit" class="pw-item">包含数字</div>
+      </div>
+    </div>
+
+    <label>确认密码<input id="pw2" name="password2" type="password" placeholder="再次输入密码" required
+                        autocomplete="new-password"></label>
+    <button type="submit">注册</button>
+  </form>
+  <p class="hint">已有账号？<a href="/login">去登录</a></p>
+</div>
+
+<script>
+function q(s){return document.querySelector(s);}
+function showPw(){ q('#pw-pop').style.display='block'; }
+function hidePw(){ setTimeout(function(){ q('#pw-pop').style.display='none'; }, 200); }
+function checkPw(){
+  var v=q('#pw').value;
+  toggle('#pw-len',   v.length>=8);
+  toggle('#pw-lower', /[a-z]/.test(v));
+  toggle('#pw-upper', /[A-Z]/.test(v));
+  toggle('#pw-digit', /[0-9]/.test(v));
+  function toggle(sel, ok){ var el=q(sel); el.classList.toggle('ok', !!ok); el.textContent = el.textContent.replace(/^[✓✗]\s*/,''); el.textContent = (ok?'✓ ':'✗ ')+el.textContent; }
+}
+function checkRegister(){
+  var v=q('#pw').value;
+  if(!(v.length>=8 && /[a-z]/.test(v) && /[A-Z]/.test(v) && /[0-9]/.test(v))){
+    alert('密码需 8 位以上，且同时包含大小写字母与数字'); return false;
+  }
+  if(v!==q('#pw2').value){ alert('两次输入的密码不一致'); return false; }
+  return true;
+}
+</script>
+{% endblock %}
