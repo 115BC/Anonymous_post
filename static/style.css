@@ -78,3 +78,13 @@ button.danger.linkbtn { color:#dc2626; }
 .user-info { flex:1; }
 .user-actions { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
 .user-actions form { margin:0; }
+
+/* 头像裁剪页 */
+.cur-avatar { margin:6px 0 14px; }
+.cur-avatar img { width:96px; height:96px; border-radius:50%; object-fit:cover; display:block; }
+.no-avatar.big { width:96px; height:96px; font-size:40px; }
+.cropper { display:flex; justify-content:center; margin:12px 0; }
+#crop { width:280px; height:280px; border-radius:12px; touch-action:none; cursor:grab; background:#1f2937; box-shadow:0 1px 3px rgba(0,0,0,.2); }
+#crop:active { cursor:grabbing; }
+.crop-controls { display:flex; align-items:center; gap:12px; font-size:13px; color:#374151; }
+.crop-controls input[type=range] { flex:1; max-width:280px; }

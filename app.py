@@ -5,7 +5,7 @@ import sqlite3
 from datetime import datetime, timedelta
 
 from flask import (Flask, render_template, request, redirect, url_for,
-                   session, flash)
+                   session, flash, jsonify)
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
@@ -93,6 +93,11 @@ def init_db():
     pcols = _cols(conn, 'posts')
     if 'is_history' not in pcols:
         conn.execute("ALTER TABLE posts ADD COLUMN is_history INTEGER DEFAULT 0")
+    # 邮箱唯一（尽力而为：若历史数据已有重复邮箱则跳过索引，仅靠应用层校验）
+    try:
+        conn.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)')
+    except sqlite3.IntegrityError:
+        pass
     # ---- 默认数据 ----
     if c.execute('SELECT COUNT(*) FROM users WHERE role="superadmin"').fetchone()[0] == 0:
         c.execute('INSERT INTO users (username,email,password_hash,role,status,created_at) VALUES (?,?,?,?,?,?)',
@@ -191,6 +196,8 @@ def register():
             conn.close(); flash('密码需 8 位以上，且同时包含大小写字母与数字'); return redirect('/register')
         if pw != pw2:
             conn.close(); flash('两次输入的密码不一致'); return redirect('/register')
+        if conn.execute('SELECT id FROM users WHERE email=?', (e,)).fetchone():
+            conn.close(); flash('邮箱已被注册'); return redirect('/register')
         if conn.execute('SELECT id FROM users WHERE username=?', (u,)).fetchone():
             conn.close(); flash('用户名已存在'); return redirect('/register')
         conn.execute('INSERT INTO users (username,email,password_hash,role,status,created_at) VALUES (?,?,?,?,?,?)',
@@ -394,18 +401,39 @@ def profile():
         email = request.form['email'].strip()
         if not username:
             conn.close(); flash('用户名不能为空'); return redirect('/profile')
-        try:
-            av = save_upload(request.files.get('avatar'), UPLOAD_AV, prefix='u%d_' % session['user_id'])
-            if av:
-                conn.execute('UPDATE users SET avatar=? WHERE id=?', (av, session['user_id']))
-            conn.execute('UPDATE users SET username=?,email=? WHERE id=?', (username, email, session['user_id']))
-            conn.commit()
-            session['username'] = username
-            conn.close(); flash('已保存'); return redirect('/profile')
-        except sqlite3.IntegrityError:
-            conn.close(); flash('用户名已存在'); return redirect('/profile')
+        if not email:
+            conn.close(); flash('邮箱不能为空'); return redirect('/profile')
+        if conn.execute('SELECT id FROM users WHERE username=? AND id!=?', (username, session['user_id'])).fetchone():
+            conn.close(); flash('用户名已被占用'); return redirect('/profile')
+        if conn.execute('SELECT id FROM users WHERE email=? AND id!=?', (email, session['user_id'])).fetchone():
+            conn.close(); flash('邮箱已被占用'); return redirect('/profile')
+        av = save_upload(request.files.get('avatar'), UPLOAD_AV, prefix='u%d_' % session['user_id'])
+        if av:
+            conn.execute('UPDATE users SET avatar=? WHERE id=?', (av, session['user_id']))
+        conn.execute('UPDATE users SET username=?,email=? WHERE id=?', (username, email, session['user_id']))
+        conn.commit()
+        session['username'] = username
+        conn.close(); flash('已保存'); return redirect('/profile')
     conn.close()
     return render_template('profile.html', user=u)
+
+
+@app.route('/profile/avatar', methods=['GET', 'POST'])
+def avatar_edit():
+    if not require_login():
+        return redirect('/login')
+    conn = db()
+    u = conn.execute('SELECT * FROM users WHERE id=?', (session['user_id'],)).fetchone()
+    if request.method == 'POST':
+        av = save_upload(request.files.get('avatar'), UPLOAD_AV, prefix='u%d_' % session['user_id'])
+        if av:
+            conn.execute('UPDATE users SET avatar=? WHERE id=?', (av, session['user_id']))
+            conn.commit(); conn.close()
+            return jsonify(ok=True, url=url_for('static', filename='avatars/' + av))
+        conn.close()
+        return jsonify(ok=False, msg='请选择有效的图片（png/jpg/jpeg/gif/webp）'), 400
+    conn.close()
+    return render_template('avatar.html', user=u)
 
 
 # ---------- admin (staff) ----------
