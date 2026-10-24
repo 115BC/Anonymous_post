@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% block title %}首页{% endblock %}
+{% block content %}
+<div class="head">
+  <h1>{% if session.role in ['admin','superadmin'] %}全部帖子{% else %}我的帖子{% endif %}</h1>
+  <a class="btn" href="/post/new">+ 发帖</a>
+</div>
+{% if posts %}
+  {% for p in posts %}
+  <div class="post">
+    <h3><a href="/post/{{ p.id }}">{{ p.title }}</a></h3>
+    <div class="meta">
+      分类：{{ p.category or '未分类' }} | {{ p.created_at }}
+      {% if session.role in ['admin','superadmin'] %}| 作者：{{ p.author }}{% endif %}
+    </div>
+    <p class="body">{{ p.body[:120] }}{% if p.body|length > 120 %}…{% endif %}</p>
+    <div class="actions">
+      {% if p.user_id == session.user_id or session.role in ['admin','superadmin'] %}
+        <a href="/post/{{ p.id }}/edit">编辑</a>
+      {% endif %}
+      {% if session.role in ['admin','superadmin'] %}
+        <form method="post" action="/post/{{ p.id }}/delete" style="display:inline" onsubmit="return confirm('确认删除该帖？');">
+          <button class="danger" type="submit">删除</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+{% else %}
+  <p class="empty">还没有帖子，点右上角“发帖”开始吧。</p>
+{% endif %}
+{% endblock %}

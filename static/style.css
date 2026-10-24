@@ -1,0 +1,33 @@
+* { box-sizing: border-box; }
+body { margin:0; font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif; background:#f5f6f8; color:#222; }
+header { background:#1f2937; color:#fff; }
+.nav { max-width:940px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; padding:12px 16px; flex-wrap:wrap; }
+.brand { color:#fff; font-weight:700; text-decoration:none; font-size:18px; }
+.nav nav a { color:#cbd5e1; text-decoration:none; margin-left:14px; font-size:14px; }
+.nav nav a:hover { color:#fff; }
+.who { color:#9ca3af; margin-left:14px; font-size:13px; }
+main { max-width:940px; margin:24px auto; padding:0 16px; }
+.card { background:#fff; border-radius:10px; padding:20px; margin-bottom:16px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+h1 { font-size:22px; } h2 { font-size:18px; } h3 { font-size:16px; margin:0 0 4px; }
+.btn, button { background:#2563eb; color:#fff; border:none; padding:8px 14px; border-radius:8px; cursor:pointer; font-size:14px; text-decoration:none; display:inline-block; }
+button.danger { background:#dc2626; }
+a.danger { color:#dc2626; font-size:13px; }
+input, select, textarea { width:100%; padding:8px 10px; margin:8px 0; border:1px solid #d1d5db; border-radius:8px; font-size:14px; }
+textarea { min-height:100px; resize:vertical; }
+.post { background:#fff; border-radius:10px; padding:16px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+.post h3 a { color:#111; text-decoration:none; }
+.meta { color:#6b7280; font-size:13px; margin:6px 0; }
+.body { white-space:pre-wrap; line-height:1.6; }
+.actions a, .actions button { margin-right:12px; font-size:13px; }
+.flash { background:#fef3c7; color:#92400e; padding:10px 14px; border-radius:8px; margin-bottom:14px; }
+.empty { color:#9ca3af; padding:20px 0; }
+.auth { display:flex; gap:16px; flex-wrap:wrap; }
+.auth .card { flex:1; min-width:260px; }
+.avatar img { width:84px; height:84px; border-radius:50%; object-fit:cover; display:block; }
+.no-avatar { width:84px; height:84px; border-radius:50%; background:#2563eb; color:#fff; display:flex; align-items:center; justify-content:center; font-size:34px; }
+.reply { background:#f3f4f6; border-radius:8px; padding:10px; margin:8px 0; }
+.post-img { max-width:100%; border-radius:8px; margin:10px 0; }
+.head { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+section { background:#fff; border-radius:10px; padding:16px; margin-bottom:14px; }
+label { display:block; font-size:13px; color:#374151; margin-top:6px; }
+ul { padding-left:18px; }

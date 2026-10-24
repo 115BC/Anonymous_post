@@ -1,0 +1,20 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Runtime data
+*.db
+.env
+*.sqlite3
+
+# Uploads (runtime generated, keep dirs via .gitkeep)
+static/uploads/*
+static/avatars/*
+!static/uploads/.gitkeep
+!static/avatars/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db

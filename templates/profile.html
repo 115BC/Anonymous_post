@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block title %}个人资料{% endblock %}
+{% block content %}
+<h1>个人资料</h1>
+<div class="card">
+  <div class="avatar" style="margin-bottom:12px">
+    {% if user.avatar %}<img src="{{ url_for('static', filename='avatars/'~user.avatar) }}">
+    {% else %}<div class="no-avatar">{{ user.username[0] }}</div>{% endif %}
+  </div>
+  <form method="post" action="/profile" enctype="multipart/form-data">
+    <label>头像（可选，图片格式）<input type="file" name="avatar" accept="image/*"></label>
+    <label>用户名<input name="username" value="{{ user.username }}" required></label>
+    <label>邮箱<input type="email" name="email" value="{{ user.email or '' }}" required></label>
+    <label>角色<input value="{{ user.role }}" disabled></label>
+    <button>保存修改</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block title %}{{ post.title }}{% endblock %}
+{% block content %}
+<div class="post" style="box-shadow:none">
+  <h1>{{ post.title }}</h1>
+  <div class="meta">
+    分类：{{ post.category or '未分类' }} | {{ post.created_at }}
+    {% if session.role in ['admin','superadmin'] %}| 作者：{{ post.author }}{% endif %}
+  </div>
+  {% if post.image_path %}<img class="post-img" src="{{ url_for('static', filename=post.image_path) }}">{% endif %}
+  <div class="body">{{ post.body }}</div>
+
+  <h2 style="margin-top:24px">回复（仅管理员可回复）</h2>
+  {% for r in replies %}
+    <div class="reply"><b>{{ r.admin_name }}</b>（{{ r.created_at }}）：{{ r.body }}</div>
+  {% else %}
+    <p class="empty">暂无回复。</p>
+  {% endfor %}
+  {% if session.role in ['admin','superadmin'] %}
+    <form method="post" action="/post/{{ post.id }}/reply" style="margin-top:12px">
+      <textarea name="body" placeholder="以管理员身份回复…" required></textarea>
+      <button>回复</button>
+    </form>
+  {% endif %}
+
+  <div class="actions" style="margin-top:16px">
+    {% if post.user_id == session.user_id or session.role in ['admin','superadmin'] %}
+      <a href="/post/{{ post.id }}/edit">编辑帖子</a>
+    {% endif %}
+    <a href="/">← 返回列表</a>
+  </div>
+</div>
+{% endblock %}
