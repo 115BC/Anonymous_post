@@ -1,13 +1,41 @@
-{% extends "layout.html" %}
-{% block title %}登录{% endblock %}
+{% extends "base.html" %}
+{% import "_icons.html" as icons %}
+{% block title %}登录 · {{ site_name }}{% endblock %}
+{% block body_class %}auth-page{% endblock %}
 {% block content %}
-<div class="auth-single card">
-  <h2>登录</h2>
-  <form method="post" action="/login">
-    <label>用户名或邮箱<input name="username" placeholder="用户名或邮箱" required></label>
-    <label>密码<input name="password" type="password" placeholder="密码" required></label>
-    <button type="submit">登录</button>
-  </form>
-  <p class="hint">还没有账号？<a href="/register">去注册</a></p>
+<div class="auth-wrap">
+  <div class="auth-brand">
+    <span class="brand-mark brand-mark-lg">{{ icons.icon('leaf', 24) }}</span>
+    <span>{{ site_name }}</span>
+  </div>
+
+  <section class="card auth-card">
+    <h1>登录</h1>
+    <p class="muted">班级内部空间，请使用你的账号登录。</p>
+
+    {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+
+    <form method="post" class="stack">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <label class="field">
+        <span>用户名</span>
+        <input name="username" value="{{ username }}" required autocomplete="username"
+               autofocus maxlength="20">
+      </label>
+      <label class="field">
+        <span>密码</span>
+        <input type="password" name="password" required autocomplete="current-password">
+      </label>
+      <button class="btn btn-primary btn-block" type="submit">登录</button>
+    </form>
+
+    <p class="auth-alt">还没有账号？<a href="{{ url_for('register') }}">用邀请码注册</a></p>
+  </section>
+
+  <p class="auth-foot">
+    <a href="{{ url_for('privacy') }}">隐私与数据说明</a>
+    <span>·</span>
+    <span>仅限本班同学</span>
+  </p>
 </div>
 {% endblock %}

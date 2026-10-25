@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% import "_icons.html" as icons %}
+{% import "_notice.html" as notice_ui %}
+{% block title %}通知 · {{ site_name }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <p class="eyebrow">班级通知</p>
+  <h1>通知</h1>
+  <p class="lede">
+    {% if nav_counts.unread %}还有 {{ nav_counts.unread }} 条未读{% else %}所有通知都已读{% endif %}
+  </p>
+</header>
+
+<nav class="chips filter-chips" aria-label="按分类筛选通知">
+  <a class="chip {% if not active_category %}is-on{% endif %}"
+     href="{{ url_for('notices') }}" {% if not active_category %}aria-current="page"{% endif %}>全部</a>
+  {% for key, label in CATEGORIES.items() %}
+    <a class="chip {% if active_category == key %}is-on{% endif %}"
+       href="{{ url_for('notices', category=key) }}"
+       {% if active_category == key %}aria-current="page"{% endif %}>{{ label }}</a>
+  {% endfor %}
+</nav>
+
+<div class="notice-list">
+  {% for n in notices %}
+    {{ notice_ui.notice_row(n) }}
+  {% else %}
+    <p class="empty-state">这个分类下还没有通知。</p>
+  {% endfor %}
+</div>
+
+{% if g.user.role in ('admin', 'superadmin') %}
+  <div class="page-actions">
+    <a class="btn btn-ghost" href="{{ url_for('admin_notices') }}">{{ icons.icon('edit', 16) }} 管理通知</a>
+    <a class="btn btn-primary" href="{{ url_for('admin_notice_new') }}">{{ icons.icon('plus', 16) }} 新通知</a>
+  </div>
+{% endif %}
+{% endblock %}

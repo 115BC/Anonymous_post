@@ -1,20 +1,32 @@
 # Python
-venv/
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
+.venv/
+venv/
 
-# Runtime data
+# 运行数据与密钥
+instance/
 *.db
-.env
+*.db-journal
+*.db-wal
 *.sqlite3
 
-# Uploads (runtime generated, keep dirs via .gitkeep)
-static/uploads/*
-static/avatars/*
-!static/uploads/.gitkeep
-!static/avatars/.gitkeep
+# 本地配置
+.env
 
-# OS
+# 测试与截图产物
+tests/profiles/
+tests/.chrome-shots/
+tests/chrome-*/
+tests/screens/
+tests/shots/
+tests/shot-seed.json
+tests/tmp_smoke.db
+tests/tmp_uploads/
+tests/shot_uploads/
+server.log
+*.log
+
+# 系统文件
 .DS_Store
 Thumbs.db

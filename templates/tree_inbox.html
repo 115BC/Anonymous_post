@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% import "_icons.html" as icons %}
+{% import "_crisis.html" as crisis %}
+{% block title %}树洞信箱 · {{ site_name }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <p class="eyebrow">雪绒花 · 私人信箱</p>
+  <h1>树洞信箱</h1>
+  <p class="lede">这些信只有你能看到。班长、团支书和管理员都无法进入。</p>
+</header>
+
+<p class="privacy-note">{{ icons.icon('alert', 16) }} 遇到危机情况，请优先联系学校心理中心与辅导员，并按班级危机流程处理。</p>
+
+<nav class="chips filter-chips" aria-label="筛选来信">
+  <a class="chip {% if active_status == 'new' %}is-on{% endif %}"
+     href="{{ url_for('tree_inbox', status='new') }}">待回复 <span class="chip-count">{{ new_count }}</span></a>
+  <a class="chip {% if active_status == 'all' %}is-on{% endif %}"
+     href="{{ url_for('tree_inbox', status='all') }}">全部 <span class="chip-count">{{ total }}</span></a>
+</nav>
+
+<div class="mail-list">
+  {% for t in threads %}
+    <a class="mail-row" href="{{ url_for('tree_inbox_thread', tid=t.id) }}">
+      <span class="mail-top">
+        <span class="tag tag-warm">{{ MOODS[t.mood] }}</span>
+        <span class="status-badge {% if t.status == 'replied' %}is-done{% endif %}">
+          {{ '已回复' if t.status == 'replied' else '待回复' }}
+        </span>
+      </span>
+      <span class="mail-excerpt">{{ t.first_body[:80] }}{% if t.first_body|length > 80 %}…{% endif %}</span>
+      <span class="mail-meta">{{ t.last_at|short_time }} · {{ t.msg_count }} 条对话</span>
+    </a>
+  {% else %}
+    <p class="empty-state">{{ '暂时没有待回复的信。' if active_status == 'new' else '信箱里还没有信。' }}</p>
+  {% endfor %}
+</div>
+
+{{ crisis.crisis_card() }}
+{% endblock %}

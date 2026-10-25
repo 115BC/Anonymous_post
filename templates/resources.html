@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% import "_icons.html" as icons %}
+{% block title %}班级资源库 · {{ site_name }}{% endblock %}
+{% block content %}
+<header class="page-head page-head-row">
+  <div>
+    <p class="eyebrow">班级资源库</p>
+    <h1>课件、笔记与资料</h1>
+    <p class="lede">只有登录的同学能下载。上传后会先经班委审核。</p>
+  </div>
+  <a class="btn btn-primary btn-sm" href="{{ url_for('resource_upload') }}">{{ icons.icon('upload', 16) }} 上传</a>
+</header>
+
+<form method="get" action="{{ url_for('resources') }}" class="search-row">
+  <label class="field">
+    <span class="sr-only">搜索资料</span>
+    <input name="q" value="{{ keyword }}" maxlength="40" placeholder="搜索资料名称、科目或说明">
+  </label>
+  <button class="btn btn-ghost" type="submit">搜索</button>
+</form>
+
+<section class="section">
+  <div class="section-head">
+    <h2>{% if keyword %}搜索结果{% else %}全部资料{% endif %}</h2>
+    <span class="count-pill">{{ resources|length }}</span>
+  </div>
+  <div class="resource-grid">
+    {% for r in resources %}
+      <article class="card resource-card">
+        <span class="resource-icon">{{ icons.icon('file', 20) }}</span>
+        <div class="resource-main">
+          <h3 class="resource-title">{{ r.title }}</h3>
+          <p class="resource-meta"><span class="tag tag-soft">{{ r.subject }}</span>
+            {{ r.filename }} · {{ r.size|filesize }}</p>
+          {% if r.description %}<p class="resource-desc">{{ r.description }}</p>{% endif %}
+          <p class="resource-meta">{{ r.uploader or '已注销同学' }} 上传 · {{ r.created_at|short_time }}
+            · {{ r.download_count }} 次下载</p>
+        </div>
+        <a class="btn btn-ghost btn-sm" href="{{ url_for('resource_download', rid=r.id) }}">
+          {{ icons.icon('download', 15) }} 下载
+        </a>
+      </article>
+    {% else %}
+      <p class="empty-state">
+        {% if keyword %}没有找到匹配的资料，换个关键词试试。{% else %}资源库还是空的，上传第一份资料吧。{% endif %}
+      </p>
+    {% endfor %}
+  </div>
+</section>
+
+{% if mine %}
+  <section class="section">
+    <div class="section-head">
+      <h2>我的上传</h2>
+      <span class="count-pill">{{ mine|length }}</span>
+    </div>
+    <div class="resource-grid">
+      {% for r in mine %}
+        <article class="card resource-card">
+          <span class="resource-icon">{{ icons.icon('file', 20) }}</span>
+          <div class="resource-main">
+            <h3 class="resource-title">{{ r.title }}</h3>
+            <p class="resource-meta">
+              <span class="status-badge {% if r.status == 'approved' %}is-done{% elif r.status == 'pending' %}is-warn{% else %}is-rejected{% endif %}">
+                {{ RESOURCE_STATUS[r.status] }}
+              </span>
+              <span class="tag tag-soft">{{ r.subject }}</span>
+              {{ r.size|filesize }} · {{ r.created_at|short_time }}
+            </p>
+            {% if r.status == 'pending' %}
+              <p class="fineprint">班委审核通过后，其他同学才能看到并下载。</p>
+            {% elif r.status == 'rejected' %}
+              <p class="fineprint">这份资料未通过审核，文件已从服务器删除，可以删除这条记录。</p>
+            {% endif %}
+          </div>
+          <div class="resource-actions">
+            {% if r.status != 'rejected' %}
+              <a class="btn btn-ghost btn-sm" href="{{ url_for('resource_download', rid=r.id) }}">
+                {{ icons.icon('download', 15) }} 下载
+              </a>
+            {% endif %}
+            <form method="post" action="{{ url_for('resource_delete', rid=r.id) }}"
+                  data-confirm="删除后文件不可恢复，确定删除这份资料吗？">
+              <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+              <button class="btn btn-danger btn-sm" type="submit">删除</button>
+            </form>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
+
+<p class="fineprint">资源库会保留上传者用户名，它不是匿名模块。请只上传你有权分享的资料，不要上传教材扫描件或付费课程内容。</p>
+{% endblock %}

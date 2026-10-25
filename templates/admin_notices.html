@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% import "_icons.html" as icons %}
+{% block title %}管理通知 · {{ site_name }}{% endblock %}
+{% block content %}
+<header class="page-head page-head-row">
+  <div>
+    <p class="eyebrow">管理</p>
+    <h1>通知</h1>
+    <p class="lede">草稿不会出现在同学们的通知列表里。</p>
+  </div>
+  <a class="btn btn-primary btn-sm" href="{{ url_for('admin_notice_new') }}">{{ icons.icon('plus', 16) }} 新建</a>
+</header>
+
+<nav class="chips filter-chips" aria-label="管理导航">
+  <a class="chip is-on" href="{{ url_for('admin_notices') }}">通知</a>
+  <a class="chip" href="{{ url_for('admin_feedback') }}">
+    匿名反馈{% if nav_counts.feedback_new %} <span class="chip-count">{{ nav_counts.feedback_new }}</span>{% endif %}
+  </a>
+  <a class="chip" href="{{ url_for('admin_resources') }}">
+    资源{% if nav_counts.resources_pending %} <span class="chip-count">{{ nav_counts.resources_pending }}</span>{% endif %}
+  </a>
+  {% if g.user.role == 'superadmin' %}
+    <a class="chip" href="{{ url_for('admin_users') }}">用户</a>
+  {% endif %}
+</nav>
+
+<div class="admin-list">
+  {% for n in notices %}
+    <article class="card admin-row">
+      <div class="admin-row-head">
+        <span class="tag tag-{{ n.category }}">{{ CATEGORIES[n.category] }}</span>
+        {% if n.pinned %}<span class="pin-flag">{{ icons.icon('pin', 12) }}置顶</span>{% endif %}
+        {% if n.status == 'draft' %}<span class="status-badge">草稿</span>{% endif %}
+      </div>
+      <h2 class="admin-row-title">{{ n.title }}</h2>
+      <p class="admin-row-meta">{{ n.author or '班委' }} · {{ n.updated_at|short_time }}
+        {% if n.deadline %} · 截止 {{ n.deadline }}{% endif %}</p>
+      <div class="admin-row-actions">
+        <a class="btn btn-ghost btn-sm" href="{{ url_for('notice_view', nid=n.id) }}">预览</a>
+        <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_notice_edit', nid=n.id) }}">编辑</a>
+        <form method="post" action="{{ url_for('admin_notice_delete', nid=n.id) }}"
+              data-confirm="删除后无法恢复，确定删除这条通知吗？">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          <button class="btn btn-danger btn-sm" type="submit">删除</button>
+        </form>
+      </div>
+    </article>
+  {% else %}
+    <p class="empty-state">还没有通知，点右上角新建。</p>
+  {% endfor %}
+</div>
+{% endblock %}

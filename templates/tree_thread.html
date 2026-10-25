@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% import "_icons.html" as icons %}
+{% import "_crisis.html" as crisis %}
+{% block title %}{{ '我们的对话' if view == 'author' else '树洞来信' }} · {{ site_name }}{% endblock %}
+{% block body_class %}page-tree{% endblock %}
+{% block content %}
+{% if view == 'counselor' %}
+  <a class="back-link" href="{{ url_for('tree_inbox') }}">{{ icons.icon('back', 16) }} 返回信箱</a>
+{% else %}
+  <a class="back-link" href="{{ url_for('tree') }}">{{ icons.icon('back', 16) }} 返回树洞</a>
+{% endif %}
+
+<header class="page-head thread-head">
+  <div class="thread-tags">
+    <span class="tag tag-soft">{{ MOODS[thread.mood] }}</span>
+    <span class="status-badge {% if thread.status == 'replied' %}is-done{% endif %}">
+      {{ '雪绒花已回复' if thread.status == 'replied' else '等雪绒花回信' }}
+    </span>
+  </div>
+  <h1>{{ '我们的对话' if view == 'author' else '树洞来信' }}</h1>
+  <p class="lede">写于 {{ thread.created_at|short_time }}</p>
+</header>
+
+{% if view == 'counselor' %}
+  <p class="privacy-note">{{ icons.icon('lock', 16) }} 这段对话仅你与写信人可见，请不要导出、截图转发或对他人提起。</p>
+{% else %}
+  <p class="privacy-note">{{ icons.icon('lock', 16) }} 只有你和雪绒花能看到这段对话。关闭页面后，需要重新输入回访码。</p>
+{% endif %}
+
+<ol class="thread thread-tree">
+  {% for m in messages %}
+    {% set mine = (view == 'author' and m.sender == 'author') or (view == 'counselor' and m.sender == 'counselor') %}
+    <li class="msg {% if mine %}msg-mine{% else %}msg-other{% endif %}">
+      <div class="msg-head">
+        <span class="msg-who">
+          {%- if m.sender == 'author' -%}
+            {{ '我' if view == 'author' else '匿名同学' }}
+          {%- else -%}
+            雪绒花
+          {%- endif -%}
+        </span>
+        <time>{{ m.created_at|short_time }}</time>
+      </div>
+      <p class="msg-body">{{ m.body }}</p>
+    </li>
+  {% endfor %}
+</ol>
+
+<form method="post" class="card composer"
+      action="{% if view == 'author' %}{{ url_for('tree_reply', token=token) }}{% else %}{{ url_for('tree_inbox_reply', tid=thread.id) }}{% endif %}">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <label class="field-label" for="tree-reply">{{ '再说一点' if view == 'author' else '给这位同学回信' }}</label>
+  <textarea id="tree-reply" name="body" rows="4" maxlength="3000" required
+            data-counter placeholder="{{ '想到了什么，可以继续写…' if view == 'author' else '回信会显示在对方的树洞里…' }}"></textarea>
+  <div class="counter"><span data-counter-for="tree-reply">0</span> / 3000</div>
+  <button class="btn btn-primary btn-block" type="submit">
+    {{ '寄出' if view == 'author' else '寄出回信' }}
+  </button>
+</form>
+
+{% if view == 'author' %}
+  <form method="post" action="{{ url_for('tree_delete', token=token) }}" class="danger-zone"
+        data-confirm="删除后这封信和全部对话都无法恢复，确定删除吗？">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <button class="text-danger" type="submit">{{ icons.icon('trash', 15) }} 删除这封信</button>
+  </form>
+{% endif %}
+
+{{ crisis.crisis_card() }}
+{% endblock %}

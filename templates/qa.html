@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% import "_icons.html" as icons %}
+{% block title %}问题交流 · {{ site_name }}{% endblock %}
+{% block content %}
+<header class="page-head page-head-row">
+  <div>
+    <p class="eyebrow">问题交流</p>
+    <h1>把问题说清楚</h1>
+    <p class="lede">课程、作业、班级事务都可以问。问答是实名的，会显示用户名。</p>
+  </div>
+  <a class="btn btn-primary btn-sm" href="{{ url_for('qa_new') }}">{{ icons.icon('plus', 16) }} 提问</a>
+</header>
+
+<nav class="chips filter-chips" aria-label="问题状态">
+  <a class="chip {% if not active_status %}is-on{% endif %}" href="{{ url_for('qa') }}">
+    全部 <span class="chip-count">{{ qa_counts.open_count + qa_counts.resolved_count }}</span>
+  </a>
+  <a class="chip {% if active_status == 'open' %}is-on{% endif %}" href="{{ url_for('qa', status='open') }}">
+    待解决 <span class="chip-count">{{ qa_counts.open_count }}</span>
+  </a>
+  <a class="chip {% if active_status == 'resolved' %}is-on{% endif %}" href="{{ url_for('qa', status='resolved') }}">
+    已解决 <span class="chip-count">{{ qa_counts.resolved_count }}</span>
+  </a>
+</nav>
+
+<div class="qa-list">
+  {% for t in threads %}
+    <a class="card qa-card" href="{{ url_for('qa_thread', tid=t.id) }}">
+      <span class="qa-card-top">
+        <span class="tag tag-soft">{{ TOPICS[t.topic] }}</span>
+        {% if t.status == 'resolved' %}<span class="status-badge is-done">已解决</span>{% endif %}
+      </span>
+      <h2 class="qa-title">{{ t.title }}</h2>
+      <p class="qa-excerpt">{{ t.body[:88] }}{% if t.body|length > 88 %}…{% endif %}</p>
+      <p class="qa-meta">{{ t.author or '已注销同学' }}{% if t.author_role in ('admin', 'superadmin') %} · 班委{% endif %}
+        · {{ t.last_at|short_time }} · {{ t.reply_count }} 条回复</p>
+    </a>
+  {% else %}
+    <p class="empty-state">还没有问题。第一个问题，往往也是大家想问的。</p>
+  {% endfor %}
+</div>
+{% endblock %}

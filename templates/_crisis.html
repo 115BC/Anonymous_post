@@ -1,0 +1,13 @@
+{% import "_icons.html" as icons %}
+{% macro crisis_card() -%}
+<section class="crisis-card">
+  <h2>{{ icons.icon('heart', 18) }} 如果你现在很难受</h2>
+  <p>请优先联系能立刻帮到你的人：</p>
+  <ul>
+    <li>学校心理中心（电话以学校最新通知为准）</li>
+    <li>全国心理援助热线 <a href="tel:12356">12356</a></li>
+    <li>紧急情况 <a href="tel:120">120</a> / <a href="tel:110">110</a></li>
+  </ul>
+  <p class="fineprint">树洞不是危机干预通道。如果你有伤害自己的念头，请直接拨打上面的电话，或联系身边信任的人。</p>
+</section>
+{%- endmacro %}

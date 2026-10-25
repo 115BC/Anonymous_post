@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% import "_icons.html" as icons %}
+{% block title %}上传资料 · {{ site_name }}{% endblock %}
+{% block content %}
+<a class="back-link" href="{{ url_for('resources') }}">{{ icons.icon('back', 16) }} 返回资源库</a>
+
+<header class="page-head">
+  <p class="eyebrow">班级资源库</p>
+  <h1>上传一份资料</h1>
+  <p class="lede">审核通过后，全班同学都可以在资源库里下载。</p>
+</header>
+
+{% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+
+<form method="post" enctype="multipart/form-data" class="card form-card">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+
+  <label class="field">
+    <span>资料名称</span>
+    <input name="title" value="{{ values.title }}" maxlength="80" required
+           placeholder="例如：数据结构期中复习提纲">
+  </label>
+
+  <label class="field">
+    <span>科目或用途</span>
+    <input name="subject" value="{{ values.subject }}" maxlength="30" required
+           placeholder="例如：数据结构 / 教资面试 / 班会">
+  </label>
+
+  <label class="field">
+    <span>补充说明（可选）</span>
+    <textarea name="description" rows="3" maxlength="500"
+              placeholder="简单说明内容范围、适用章节或注意事项…">{{ values.description }}</textarea>
+  </label>
+
+  <label class="field">
+    <span>选择文件</span>
+    <input type="file" name="file" required
+           accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip,.md,.txt,.png,.jpg,.jpeg">
+    <span class="field-help">支持 PDF、Word、PPT、Excel、ZIP、Markdown、文本和图片，单个文件不超过 {{ max_mb }} MB。</span>
+  </label>
+
+  <p class="privacy-note">{{ icons.icon('lock', 16) }} 文件保存在服务器私有目录，只有登录的同学能通过本站下载，不会出现在公开网页路径里。</p>
+
+  <button class="btn btn-primary btn-block" type="submit">{{ icons.icon('upload', 16) }} 上传并等待审核</button>
+  <p class="fineprint">请只上传你有权分享的内容。班委可以退回不合适的资料，退回时文件会从服务器删除。</p>
+</form>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% import "_icons.html" as icons %}
+{% block title %}账号 · {{ site_name }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <p class="eyebrow">账号</p>
+  <h1>{{ g.user.username }}</h1>
+  <p class="lede">{{ role_label }} · 注册于 {{ g.user.created_at|short_time }}</p>
+</header>
+
+<section class="card link-list">
+  {% if g.user.role in ('admin', 'superadmin') %}
+    <a class="link-row" href="{{ url_for('admin_notices') }}">
+      <span class="quick-icon">{{ icons.icon('edit', 18) }}</span>
+      <span>管理后台</span>
+      {% if nav_counts.feedback_new %}<span class="count-pill">{{ nav_counts.feedback_new }}</span>{% endif %}
+      {{ icons.icon('arrow', 16) }}
+    </a>
+  {% elif g.user.role == 'counselor' %}
+    <a class="link-row" href="{{ url_for('tree_inbox') }}">
+      <span class="quick-icon">{{ icons.icon('inbox', 18) }}</span>
+      <span>树洞信箱</span>
+      {% if nav_counts.tree_new %}<span class="count-pill">{{ nav_counts.tree_new }}</span>{% endif %}
+      {{ icons.icon('arrow', 16) }}
+    </a>
+  {% endif %}
+  <a class="link-row" href="{{ url_for('notices') }}">
+    <span class="quick-icon">{{ icons.icon('bell', 18) }}</span>
+    <span>通知</span>
+    {% if nav_counts.unread %}<span class="count-pill">{{ nav_counts.unread }}</span>{% endif %}
+    {{ icons.icon('arrow', 16) }}
+  </a>
+  <a class="link-row" href="{{ url_for('privacy') }}">
+    <span class="quick-icon">{{ icons.icon('shield', 18) }}</span>
+    <span>隐私与数据说明</span>
+    {{ icons.icon('arrow', 16) }}
+  </a>
+</section>
+
+<section class="card form-card">
+  <h2>修改密码</h2>
+  {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+  <form method="post" class="stack">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label class="field">
+      <span>当前密码</span>
+      <input type="password" name="current_password" required autocomplete="current-password">
+    </label>
+    <label class="field">
+      <span>新密码</span>
+      <input type="password" name="new_password" required autocomplete="new-password" minlength="8">
+      <small class="field-help">至少 8 位，同时包含大写字母、小写字母和数字</small>
+    </label>
+    <label class="field">
+      <span>确认新密码</span>
+      <input type="password" name="confirm_password" required autocomplete="new-password" minlength="8">
+    </label>
+    <button class="btn btn-primary" type="submit">更新密码</button>
+  </form>
+</section>
+
+<form method="post" action="{{ url_for('logout') }}" class="logout-row">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <button class="btn btn-ghost btn-block" type="submit">退出登录</button>
+</form>
+{% endblock %}

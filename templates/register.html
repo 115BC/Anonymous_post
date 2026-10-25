@@ -1,52 +1,52 @@
-{% extends "layout.html" %}
-{% block title %}注册{% endblock %}
+{% extends "base.html" %}
+{% import "_icons.html" as icons %}
+{% block title %}注册 · {{ site_name }}{% endblock %}
+{% block body_class %}auth-page{% endblock %}
 {% block content %}
-<div class="auth-single card">
-  <h2>注册</h2>
-  <p class="hint">注册需填写邮箱与邀请码</p>
-  <form method="post" action="/register" onsubmit="return checkRegister()">
-    <label>用户名<input name="username" placeholder="用户名" required></label>
-    <label>邮箱<input name="email" type="email" placeholder="邮箱" required></label>
-    <label>邀请码<input name="invite_code" placeholder="邀请码" required></label>
+<div class="auth-wrap">
+  <div class="auth-brand">
+    <span class="brand-mark brand-mark-lg">{{ icons.icon('leaf', 24) }}</span>
+    <span>{{ site_name }}</span>
+  </div>
 
-    <div class="pw-wrap">
-      <label>密码<input id="pw" name="password" type="password" placeholder="密码" required
-                       autocomplete="new-password" onfocus="showPw()" oninput="checkPw()" onblur="hidePw()"></label>
-      <div id="pw-pop" class="pw-pop">
-        <div class="pw-title">密码需满足：</div>
-        <div id="pw-len" class="pw-item">至少 8 位</div>
-        <div id="pw-lower" class="pw-item">包含小写字母</div>
-        <div id="pw-upper" class="pw-item">包含大写字母</div>
-        <div id="pw-digit" class="pw-item">包含数字</div>
-      </div>
-    </div>
+  <section class="card auth-card">
+    <h1>注册</h1>
+    <p class="muted">邀请码由班委发布，请勿转发到班级群以外。</p>
 
-    <label>确认密码<input id="pw2" name="password2" type="password" placeholder="再次输入密码" required
-                        autocomplete="new-password"></label>
-    <button type="submit">注册</button>
-  </form>
-  <p class="hint">已有账号？<a href="/login">去登录</a></p>
+    {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+
+    <form method="post" class="stack">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <label class="field">
+        <span>邀请码</span>
+        <input name="invite_code" value="{{ values.get('invite_code', '') }}" required
+               autocomplete="off" autocapitalize="characters" maxlength="32">
+      </label>
+      <label class="field">
+        <span>用户名</span>
+        <input name="username" value="{{ values.get('username', '') }}" required
+               autocomplete="username" maxlength="20">
+        <small class="field-help">2–20 位，可用中英文、数字、下划线或短横线</small>
+      </label>
+      <label class="field">
+        <span>密码</span>
+        <input type="password" name="password" required autocomplete="new-password" minlength="8">
+        <small class="field-help">至少 8 位，同时包含大写字母、小写字母和数字</small>
+      </label>
+      <label class="field">
+        <span>确认密码</span>
+        <input type="password" name="password2" required autocomplete="new-password" minlength="8">
+      </label>
+      <button class="btn btn-primary btn-block" type="submit">注册</button>
+    </form>
+
+    <p class="auth-alt">已经有账号？<a href="{{ url_for('login') }}">直接登录</a></p>
+  </section>
+
+  <p class="auth-foot">
+    <a href="{{ url_for('privacy') }}">隐私与数据说明</a>
+    <span>·</span>
+    <span>注册即表示同意班级内部使用约定</span>
+  </p>
 </div>
-
-<script>
-function q(s){return document.querySelector(s);}
-function showPw(){ q('#pw-pop').style.display='block'; }
-function hidePw(){ setTimeout(function(){ q('#pw-pop').style.display='none'; }, 200); }
-function checkPw(){
-  var v=q('#pw').value;
-  toggle('#pw-len',   v.length>=8);
-  toggle('#pw-lower', /[a-z]/.test(v));
-  toggle('#pw-upper', /[A-Z]/.test(v));
-  toggle('#pw-digit', /[0-9]/.test(v));
-  function toggle(sel, ok){ var el=q(sel); el.classList.toggle('ok', !!ok); el.textContent = el.textContent.replace(/^[✓✗]\s*/,''); el.textContent = (ok?'✓ ':'✗ ')+el.textContent; }
-}
-function checkRegister(){
-  var v=q('#pw').value;
-  if(!(v.length>=8 && /[a-z]/.test(v) && /[A-Z]/.test(v) && /[0-9]/.test(v))){
-    alert('密码需 8 位以上，且同时包含大小写字母与数字'); return false;
-  }
-  if(v!==q('#pw2').value){ alert('两次输入的密码不一致'); return false; }
-  return true;
-}
-</script>
 {% endblock %}

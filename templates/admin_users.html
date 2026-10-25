@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% import "_icons.html" as icons %}
+{% block title %}用户管理 · {{ site_name }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <p class="eyebrow">系统管理</p>
+  <h1>用户</h1>
+  <p class="lede">雪绒花与系统管理员角色只能由服务器命令设置。</p>
+</header>
+
+<nav class="chips filter-chips" aria-label="管理导航">
+  <a class="chip" href="{{ url_for('admin_notices') }}">通知</a>
+  <a class="chip" href="{{ url_for('admin_feedback') }}">匿名反馈</a>
+  <a class="chip" href="{{ url_for('admin_resources') }}">资源</a>
+  <a class="chip is-on" href="{{ url_for('admin_users') }}">用户</a>
+</nav>
+
+<p class="privacy-note">{{ icons.icon('lock', 16) }} 这里不会显示任何匿名反馈或树洞内容。counselor 账号用于雪绒花，避免管理员通过改角色进入树洞。</p>
+
+<div class="admin-list">
+  {% for u in users %}
+    <article class="card user-row">
+      <div class="user-row-head">
+        <div>
+          <h2 class="user-name">{{ u.username }}</h2>
+          <p class="admin-row-meta">注册于 {{ u.created_at|short_time }}</p>
+        </div>
+        <div class="user-badges">
+          <span class="role-badge role-{{ u.role }}">{{ ROLE_LABELS[u.role] }}</span>
+          <span class="status-badge {% if u.status == 'active' %}is-done{% endif %}">
+            {{ '正常' if u.status == 'active' else '已封禁' }}
+          </span>
+        </div>
+      </div>
+
+      {% if u.role in ('counselor', 'superadmin') %}
+        <p class="fineprint">该账号由服务器命令管理，不能在这里改名、封禁或改角色。</p>
+      {% else %}
+        <div class="user-actions">
+          <form method="post" action="{{ url_for('admin_user_rename', uid=u.id) }}" class="inline-form-row">
+            <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+            <label class="field grow">
+              <span class="sr-only">新用户名</span>
+              <input name="username" value="{{ u.username }}" maxlength="20" required>
+            </label>
+            <button class="btn btn-ghost btn-sm" type="submit">改名</button>
+          </form>
+
+          <form method="post" action="{{ url_for('admin_user_role', uid=u.id) }}" class="inline-form-row">
+            <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+            <label class="field grow">
+              <span class="sr-only">角色</span>
+              <select name="role">
+                <option value="member" {% if u.role == 'member' %}selected{% endif %}>同学</option>
+                <option value="admin" {% if u.role == 'admin' %}selected{% endif %}>班委</option>
+              </select>
+            </label>
+            <button class="btn btn-ghost btn-sm" type="submit">保存角色</button>
+          </form>
+
+          {% if u.id != g.user.id %}
+            <form method="post" action="{{ url_for('admin_user_ban', uid=u.id) }}"
+                  data-confirm="确定{{ '解封' if u.status == 'banned' else '封禁' }} {{ u.username }} 吗？">
+              <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+              <button class="btn {{ 'btn-ghost' if u.status == 'banned' else 'btn-danger' }} btn-sm" type="submit">
+                {{ '解封' if u.status == 'banned' else '封禁' }}
+              </button>
+            </form>
+          {% endif %}
+        </div>
+      {% endif %}
+    </article>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% import "_icons.html" as icons %}
+
+{% macro deadline_chip(deadline, long=false) -%}
+  {% set d = deadline|days_until %}
+  {% if d is not none %}
+    <span class="meta-chip{% if d < 0 %} is-overdue{% elif d == 0 %} is-today{% endif %}">
+      {%- if d < 0 -%}已截止{%- elif d == 0 -%}今天截止{%- elif long -%}截止 {{ deadline }} · 剩 {{ d }} 天{%- else -%}剩 {{ d }} 天{%- endif -%}
+    </span>
+  {% endif %}
+{%- endmacro %}
+
+{% macro notice_row(n) -%}
+<a class="notice-row{% if n.pinned %} is-pinned{% endif %}" href="{{ url_for('notice_view', nid=n.id) }}">
+  <span class="notice-row-main">
+    <span class="notice-row-top">
+      <span class="tag tag-{{ n.category }}">{{ CATEGORIES[n.category] }}</span>
+      {% if n.pinned %}<span class="pin-flag">{{ icons.icon('pin', 12) }}置顶</span>{% endif %}
+      {% if n.unread %}<span class="unread-dot"><span class="sr-only">未读</span></span>{% endif %}
+    </span>
+    <span class="notice-title">{{ n.title }}</span>
+    <span class="notice-meta">
+      {{ n.created_at|short_time }}
+      {% if n.deadline %} · {{ deadline_chip(n.deadline) }}{% endif %}
+    </span>
+  </span>
+  <span class="notice-arrow">{{ icons.icon('arrow', 18) }}</span>
+</a>
+{%- endmacro %}

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% import "_icons.html" as icons %}
+{% import "_crisis.html" as crisis %}
+{% block title %}树洞 · {{ site_name }}{% endblock %}
+{% block body_class %}page-tree{% endblock %}
+{% block content %}
+<header class="page-head tree-head">
+  <p class="eyebrow">雪绒花的树洞</p>
+  <h1>写一封信</h1>
+  <p class="lede">不用署名，也不用想好怎么开头。</p>
+</header>
+
+<section class="tree-letter">
+  <p class="tree-sign">雪绒花</p>
+  <p class="tree-quote">“有些话，不必署名。写在这里的，只有我和你。”</p>
+</section>
+
+{% if new_code %}
+  <section class="card code-card code-warm">
+    <span class="success-icon">{{ icons.icon('check', 22) }}</span>
+    <h2>信已经放好了</h2>
+    <p class="muted">雪绒花回复后，用这串回访码回来查看。</p>
+    <div class="code-value" data-code="{{ new_code }}">{{ new_code }}</div>
+    <div class="code-actions">
+      <button class="btn btn-ghost" type="button" data-copy="{{ new_code }}">
+        {{ icons.icon('copy', 16) }} 复制
+      </button>
+      <form method="post" action="{{ url_for('tree_open') }}">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <input type="hidden" name="code" value="{{ new_code }}">
+        <button class="btn btn-primary" type="submit">进入对话 {{ icons.icon('arrow', 16) }}</button>
+      </form>
+    </div>
+    <p class="warn-note">{{ icons.icon('alert', 16) }} 回访码只显示这一次，丢失后无法找回。请不要把回访码发给别人。</p>
+    <a class="text-link" href="{{ url_for('tree') }}">再写一封</a>
+  </section>
+{% else %}
+
+<div class="chips tree-jumps">
+  <a class="chip is-on" href="#write">写一封信</a>
+  <a class="chip" href="#lookup">我们的对话</a>
+</div>
+
+{% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+
+<form method="post" class="card form-card tree-form" id="write">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <fieldset class="chip-field">
+    <legend>此刻的心情</legend>
+    <div class="chips">
+      {% for key, label in moods.items() %}
+        <label class="chip">
+          <input type="radio" name="mood" value="{{ key }}" {% if mood == key %}checked{% endif %} required>
+          <span>{{ label }}</span>
+        </label>
+      {% endfor %}
+    </div>
+  </fieldset>
+
+  <label class="field-label" for="tree-body">想说的话</label>
+  <textarea id="tree-body" name="body" rows="8" maxlength="3000" required
+            data-counter placeholder="慢慢写，不着急…">{{ body }}</textarea>
+  <div class="counter"><span data-counter-for="tree-body">0</span> / 3000</div>
+
+  <button class="btn btn-primary btn-block" type="submit">把信放进去</button>
+  <p class="fineprint">在系统里，只有雪绒花能打开这封信。班长、团支书和管理员都无法查看。</p>
+</form>
+
+<section class="card lookup-card" id="lookup">
+  <h2>查看回复</h2>
+  <p class="muted">输入写信后拿到的回访码。</p>
+  {% if locked %}<p class="form-error" role="alert">尝试次数过多，请 15 分钟后再试。</p>{% endif %}
+  <form method="post" action="{{ url_for('tree_open') }}" class="inline-form-row">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <label class="field grow">
+      <span class="sr-only">回访码</span>
+      <input name="code" placeholder="XXXX-XXXX" autocomplete="off" autocapitalize="characters"
+             spellcheck="false" maxlength="12" required>
+    </label>
+    <button class="btn btn-ghost" type="submit">打开对话</button>
+  </form>
+</section>
+
+{{ crisis.crisis_card() }}
+{% endif %}
+{% endblock %}

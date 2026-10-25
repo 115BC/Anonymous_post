@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% import "_icons.html" as icons %}
+{% block title %}{{ notice.title }} · {{ site_name }}{% endblock %}
+{% block content %}
+<a class="back-link" href="{{ url_for('notices') }}">{{ icons.icon('back', 16) }} 返回通知</a>
+
+<article class="card article">
+  <div class="article-top">
+    <span class="tag tag-{{ notice.category }}">{{ CATEGORIES[notice.category] }}</span>
+    {% if notice.pinned %}<span class="pin-flag">{{ icons.icon('pin', 12) }}置顶</span>{% endif %}
+    {% if notice.status == 'draft' %}<span class="status-badge">草稿</span>{% endif %}
+  </div>
+  <h1>{{ notice.title }}</h1>
+  <p class="article-meta">{{ notice.author or '班委' }} · {{ notice.created_at|short_time }}</p>
+
+  {% if notice.deadline %}
+    <p class="deadline-banner">
+      {{ icons.icon('clock', 16) }}
+      <span>截止 {{ notice.deadline }}</span>
+      {% set d = notice.deadline|days_until %}
+      {% if d is not none %}
+        <strong>{% if d < 0 %}已截止{% elif d == 0 %}今天截止{% else %}剩 {{ d }} 天{% endif %}</strong>
+      {% endif %}
+    </p>
+  {% endif %}
+
+  <div class="article-body">{{ notice.body }}</div>
+
+  {% if g.user.role in ('admin', 'superadmin') %}
+    <div class="article-actions">
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_notice_edit', nid=notice.id) }}">{{ icons.icon('edit', 15) }} 编辑</a>
+      <form method="post" action="{{ url_for('admin_notice_delete', nid=notice.id) }}"
+            data-confirm="删除后无法恢复，确定删除这条通知吗？">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <button class="btn btn-danger btn-sm" type="submit">{{ icons.icon('trash', 15) }} 删除</button>
+      </form>
+    </div>
+  {% endif %}
+</article>
+{% endblock %}

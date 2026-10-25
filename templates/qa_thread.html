@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% import "_icons.html" as icons %}
+{% block title %}{{ thread.title }} · 问题交流{% endblock %}
+{% block content %}
+<a class="back-link" href="{{ url_for('qa') }}">{{ icons.icon('back', 16) }} 返回问题列表</a>
+
+<header class="page-head thread-head">
+  <div class="thread-tags">
+    <span class="tag tag-soft">{{ TOPICS[thread.topic] }}</span>
+    <span class="status-badge {% if thread.status == 'resolved' %}is-done{% endif %}">
+      {{ '已解决' if thread.status == 'resolved' else '待解决' }}
+    </span>
+  </div>
+  <h1>{{ thread.title }}</h1>
+  <p class="lede">{{ thread.author or '已注销同学' }}{% if thread.author_role in ('admin', 'superadmin') %} · 班委{% endif %}
+    · 发布于 {{ thread.created_at|short_time }}</p>
+</header>
+
+<article class="card qa-article">
+  <p class="qa-body">{{ thread.body }}</p>
+</article>
+
+<section class="section">
+  <div class="section-head">
+    <h2>回复</h2>
+    <span class="count-pill">{{ replies|length }}</span>
+  </div>
+  <ol class="thread">
+    {% for r in replies %}
+      <li class="msg msg-other">
+        <div class="msg-head">
+          <span class="msg-who">{{ r.author or '已注销同学' }}{% if r.author_role in ('admin', 'superadmin') %} · 班委{% endif %}</span>
+          <time>{{ r.created_at|short_time }}</time>
+        </div>
+        <p class="msg-body">{{ r.body }}</p>
+      </li>
+    {% else %}
+      <li class="empty-state">还没有回复，来帮同学一把。</li>
+    {% endfor %}
+  </ol>
+</section>
+
+<form method="post" action="{{ url_for('qa_reply', tid=thread.id) }}" class="card composer">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <label class="field-label" for="qa-reply">写下你的回答</label>
+  <textarea id="qa-reply" name="body" rows="4" maxlength="5000" required
+            data-counter placeholder="回答会显示在这里，也会显示你的用户名…"></textarea>
+  <div class="counter"><span data-counter-for="qa-reply">0</span> / 5000</div>
+  <button class="btn btn-primary btn-block" type="submit">发送回复</button>
+</form>
+
+{% if can_manage %}
+  <div class="qa-actions">
+    <form method="post" action="{{ url_for('qa_resolve', tid=thread.id) }}">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <button class="btn btn-ghost btn-sm" type="submit">
+        {{ icons.icon('check', 15) }} {{ '重新打开' if thread.status == 'resolved' else '标记已解决' }}
+      </button>
+    </form>
+    <form method="post" action="{{ url_for('qa_delete', tid=thread.id) }}"
+          data-confirm="删除后这个问题和全部回复都无法恢复，确定删除吗？">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <button class="text-danger" type="submit">{{ icons.icon('trash', 15) }} 删除问题</button>
+    </form>
+  </div>
+{% endif %}
+{% endblock %}

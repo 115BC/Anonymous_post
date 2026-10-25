@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% import "_icons.html" as icons %}
+{% import "_notice.html" as notice_ui %}
+{% block title %}首页 · {{ site_name }}{% endblock %}
+{% block body_class %}page-home{% endblock %}
+{% block content %}
+<header class="page-head home-head">
+  <p class="eyebrow">{{ today_label }}</p>
+  <h1>{{ greeting }}，{{ g.user.username }}</h1>
+  <p class="lede">班级里的事，都在这里。</p>
+</header>
+
+<div class="home-grid">
+<div class="home-lead">
+{% if hero %}
+  {% set hd = hero.deadline|days_until %}
+  <a class="hero-card" href="{{ url_for('notice_view', nid=hero.id) }}">
+    <span class="hero-top">
+      <span class="tag tag-light">{{ CATEGORIES[hero.category] }}</span>
+      {% if hd is not none %}
+        <span class="hero-days">
+          {%- if hd < 0 -%}已截止{%- elif hd == 0 -%}今天截止{%- else -%}剩 {{ hd }} 天{%- endif -%}
+        </span>
+      {% elif hero.pinned %}
+        <span class="hero-days">置顶</span>
+      {% endif %}
+    </span>
+    <span class="hero-title">{{ hero.title }}</span>
+    <span class="hero-excerpt">{{ hero.body[:64] }}{% if hero.body|length > 64 %}…{% endif %}</span>
+    <span class="hero-link">查看安排 {{ icons.icon('arrow', 16) }}</span>
+  </a>
+{% else %}
+  <section class="card empty-card">
+    <h2>还没有通知</h2>
+    <p class="muted">班级通知会出现在这里。</p>
+    {% if g.user.role in ('admin', 'superadmin') %}
+      <a class="btn btn-primary btn-sm" href="{{ url_for('admin_notice_new') }}">发第一条通知</a>
+    {% endif %}
+  </section>
+{% endif %}
+</div>
+
+<aside class="home-side">
+<div class="quick-grid">
+  <a class="quick-card" href="{{ url_for('feedback') }}">
+    <span class="quick-icon">{{ icons.icon('chat', 20) }}</span>
+    <span class="quick-title">匿名反馈</span>
+    <span class="quick-desc">不关联账号，凭回访码看回复</span>
+  </a>
+  {% if g.user.role == 'counselor' %}
+    <a class="quick-card quick-warm" href="{{ url_for('tree_inbox') }}">
+      <span class="quick-icon">{{ icons.icon('inbox', 20) }}</span>
+      <span class="quick-title">树洞信箱</span>
+      <span class="quick-desc">{% if nav_counts.tree_new %}有 {{ nav_counts.tree_new }} 封信等你回复{% else %}暂时没有待回复的信{% endif %}</span>
+    </a>
+  {% else %}
+    <a class="quick-card quick-warm" href="{{ url_for('tree') }}">
+      <span class="quick-icon">{{ icons.icon('heart', 20) }}</span>
+      <span class="quick-title">雪绒花的树洞</span>
+      <span class="quick-desc">只有雪绒花能看到这封信</span>
+    </a>
+  {% endif %}
+  <a class="quick-card" href="{{ url_for('qa') }}">
+    <span class="quick-icon">{{ icons.icon('help', 20) }}</span>
+    <span class="quick-title">问题交流</span>
+    <span class="quick-desc">{% if qa_open %}{{ qa_open }} 个问题等大家回答{% else %}课程、作业、班级事务都可以问{% endif %}</span>
+  </a>
+  <a class="quick-card" href="{{ url_for('resources') }}">
+    <span class="quick-icon">{{ icons.icon('folder', 20) }}</span>
+    <span class="quick-title">班级资源库</span>
+    <span class="quick-desc">{% if resource_count %}已共享 {{ resource_count }} 份资料{% else %}课件、笔记，班委审核后共享{% endif %}</span>
+  </a>
+</div>
+
+<section class="transparency">
+  <p class="eyebrow">反馈透明</p>
+  {% if stats.total %}
+    <p>近 7 天收到 <strong>{{ stats.total }}</strong> 条匿名反馈，<strong>{{ stats.replied }}</strong> 条已回复。</p>
+  {% else %}
+    <p>近 7 天还没有收到反馈。你的每一条意见，班委都会看到。</p>
+  {% endif %}
+  <a class="text-link" href="{{ url_for('feedback') }}">写一条匿名反馈 {{ icons.icon('arrow', 14) }}</a>
+</section>
+
+{% if g.user.role in ('admin', 'superadmin') %}
+  <a class="admin-strip" href="{{ url_for('admin_notices') }}">
+    <span class="quick-icon">{{ icons.icon('edit', 18) }}</span>
+    <span>进入管理后台{% if nav_counts.feedback_new %} · {{ nav_counts.feedback_new }} 条反馈待回复{% endif %}{% if nav_counts.resources_pending %} · {{ nav_counts.resources_pending }} 份资料待审核{% endif %}</span>
+    {{ icons.icon('arrow', 16) }}
+  </a>
+{% endif %}
+</aside>
+
+<div class="home-feed">
+<section class="section">
+  <div class="section-head">
+    <h2>最新通知</h2>
+    <a class="text-link" href="{{ url_for('notices') }}">
+      全部{% if nav_counts.unread %} <span class="count-pill">{{ nav_counts.unread }}</span>{% endif %}
+    </a>
+  </div>
+  <div class="notice-list">
+    {% for n in notices %}
+      {{ notice_ui.notice_row(n) }}
+    {% else %}
+      <p class="empty-state">暂时没有已发布的通知。</p>
+    {% endfor %}
+  </div>
+</section>
+</div>
+</div>
+{% endblock %}

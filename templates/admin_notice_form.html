@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% import "_icons.html" as icons %}
+{% block title %}{{ '新建通知' if mode == 'new' else '编辑通知' }} · {{ site_name }}{% endblock %}
+{% block content %}
+<a class="back-link" href="{{ url_for('admin_notices') }}">{{ icons.icon('back', 16) }} 返回通知管理</a>
+
+<header class="page-head">
+  <p class="eyebrow">管理</p>
+  <h1>{{ '新建通知' if mode == 'new' else '编辑通知' }}</h1>
+</header>
+
+{% if errors %}
+  <div class="form-error" role="alert">
+    <p>请检查以下内容：</p>
+    <ul>{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul>
+  </div>
+{% endif %}
+
+<form method="post" class="card form-card">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+
+  <label class="field">
+    <span>分类</span>
+    <select name="category" required>
+      {% for key, label in CATEGORIES.items() %}
+        <option value="{{ key }}" {% if values.category == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </label>
+
+  <label class="field">
+    <span>标题</span>
+    <input name="title" value="{{ values.title }}" required maxlength="120" minlength="2">
+  </label>
+
+  <label class="field">
+    <span>正文</span>
+    <textarea id="notice-body" name="body" rows="10" required maxlength="20000" minlength="2"
+              data-counter>{{ values.body }}</textarea>
+    <span class="counter"><span data-counter-for="notice-body">0</span> / 20000</span>
+  </label>
+
+  <div class="field-grid">
+    <label class="field">
+      <span>截止日期</span>
+      <input type="date" name="deadline" value="{{ values.deadline }}">
+      <small class="field-help">留空表示没有截止日期</small>
+    </label>
+    <label class="field">
+      <span>状态</span>
+      <select name="status">
+        <option value="published" {% if values.status == 'published' %}selected{% endif %}>发布</option>
+        <option value="draft" {% if values.status == 'draft' %}selected{% endif %}>草稿</option>
+      </select>
+    </label>
+  </div>
+
+  <label class="check-field">
+    <input type="checkbox" name="pinned" value="1" {% if values.pinned %}checked{% endif %}>
+    <span>置顶这条通知</span>
+  </label>
+
+  <div class="form-actions">
+    <a class="btn btn-ghost" href="{{ url_for('admin_notices') }}">取消</a>
+    <button class="btn btn-primary" type="submit">{{ '发布' if mode == 'new' else '保存' }}</button>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% import "_icons.html" as icons %}
+{% block title %}提问 · {{ site_name }}{% endblock %}
+{% block content %}
+<a class="back-link" href="{{ url_for('qa') }}">{{ icons.icon('back', 16) }} 返回问题列表</a>
+
+<header class="page-head">
+  <p class="eyebrow">问题交流</p>
+  <h1>提一个问题</h1>
+  <p class="lede">说清楚背景和卡住的地方，更容易得到有用的回答。</p>
+</header>
+
+{% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+
+<form method="post" class="card form-card">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+
+  <fieldset class="chip-field">
+    <legend>问题关于</legend>
+    <div class="chips">
+      {% for key, label in TOPICS.items() %}
+        <label class="chip">
+          <input type="radio" name="topic" value="{{ key }}" {% if values.topic == key %}checked{% endif %} required>
+          <span>{{ label }}</span>
+        </label>
+      {% endfor %}
+    </div>
+  </fieldset>
+
+  <label class="field">
+    <span>标题</span>
+    <input name="title" value="{{ values.title }}" maxlength="120" required
+           placeholder="一句话说明你的问题">
+  </label>
+
+  <label class="field-label" for="qa-body">具体描述</label>
+  <textarea id="qa-body" name="body" rows="8" maxlength="10000" required
+            data-counter placeholder="已经试过什么、卡在哪里、希望得到怎样的帮助…">{{ values.body }}</textarea>
+  <div class="counter"><span data-counter-for="qa-body">0</span> / 10000</div>
+
+  <p class="privacy-note">{{ icons.icon('users', 16) }} 问题交流是实名的：问题、回复都会显示你的用户名。需要匿名表达，请使用匿名反馈。</p>
+
+  <button class="btn btn-primary btn-block" type="submit">发布问题</button>
+</form>
+{% endblock %}
