@@ -16,6 +16,13 @@
       {% if nav_counts.feedback_new %}<span class="count-pill">{{ nav_counts.feedback_new }}</span>{% endif %}
       {{ icons.icon('arrow', 16) }}
     </a>
+    {% if g.user.role == 'superadmin' %}
+      <a class="link-row" href="{{ url_for('admin_settings') }}">
+        <span class="quick-icon">{{ icons.icon('key', 18) }}</span>
+        <span>邀请码设置</span>
+        {{ icons.icon('arrow', 16) }}
+      </a>
+    {% endif %}
   {% elif g.user.role == 'counselor' %}
     <a class="link-row" href="{{ url_for('tree_inbox') }}">
       <span class="quick-icon">{{ icons.icon('inbox', 18) }}</span>

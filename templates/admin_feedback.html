@@ -10,16 +10,7 @@
   </div>
 </header>
 
-<nav class="chips filter-chips" aria-label="管理导航">
-  <a class="chip" href="{{ url_for('admin_notices') }}">通知</a>
-  <a class="chip is-on" href="{{ url_for('admin_feedback') }}">匿名反馈</a>
-  <a class="chip" href="{{ url_for('admin_resources') }}">
-    资源{% if nav_counts.resources_pending %} <span class="chip-count">{{ nav_counts.resources_pending }}</span>{% endif %}
-  </a>
-  {% if g.user.role == 'superadmin' %}
-    <a class="chip" href="{{ url_for('admin_users') }}">用户</a>
-  {% endif %}
-</nav>
+{% include "_admin_nav.html" %}
 
 <nav class="chips filter-chips" aria-label="筛选反馈">
   <a class="chip {% if active_status == 'new' %}is-on{% endif %}"

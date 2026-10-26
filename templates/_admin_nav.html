@@ -1,0 +1,14 @@
+{% set ep = request.endpoint or '' %}
+<nav class="chips filter-chips" aria-label="管理导航">
+  <a class="chip {% if ep == 'admin_notices' %}is-on{% endif %}" href="{{ url_for('admin_notices') }}">通知</a>
+  <a class="chip {% if ep == 'admin_feedback' %}is-on{% endif %}" href="{{ url_for('admin_feedback') }}">
+    匿名反馈{% if nav_counts.feedback_new %} <span class="chip-count">{{ nav_counts.feedback_new }}</span>{% endif %}
+  </a>
+  <a class="chip {% if ep == 'admin_resources' %}is-on{% endif %}" href="{{ url_for('admin_resources') }}">
+    资源{% if nav_counts.resources_pending %} <span class="chip-count">{{ nav_counts.resources_pending }}</span>{% endif %}
+  </a>
+  {% if g.user.role == 'superadmin' %}
+    <a class="chip {% if ep == 'admin_users' %}is-on{% endif %}" href="{{ url_for('admin_users') }}">用户</a>
+    <a class="chip {% if ep == 'admin_settings' %}is-on{% endif %}" href="{{ url_for('admin_settings') }}">设置</a>
+  {% endif %}
+</nav>

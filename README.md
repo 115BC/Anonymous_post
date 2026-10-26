@@ -99,10 +99,10 @@ flask --app app set-role xueronghua counselor
 
 同一时间只允许一个 `counselor`。系统管理员和班委即使在后台也无法进入树洞信箱，接口直接返回 403。雪绒花换人时，先把旧账号改回 `member`，再设置新账号。
 
-常用命令：
+系统管理员登录后，可以在 **管理 → 设置** 中查看、复制和修改邀请码；修改后旧邀请码立即失效。没有服务器权限时也可以直接用命令：
 
 ```bash
-flask --app app set-invite CLASS2027          # 修改邀请码
+flask --app app set-invite CLASS2027          # 修改邀请码（与后台设置等效）
 flask --app app set-site "青禾 · 计师班"       # 修改站点名称
 flask --app app reset-password admin          # 交互式重置密码
 flask --app app set-role 张三 admin            # 设班委

@@ -71,6 +71,8 @@ const shots = [
   { name: 'admin-feedback', url: '/admin/feedback', w: 390, h: 844, who: 'admin', scheme: 'light' },
   { name: 'admin-feedback-thread', url: '/admin/feedback/1', w: 390, h: 844, who: 'admin', scheme: 'light', full: true },
   { name: 'admin-users', url: '/admin/users', w: 390, h: 844, who: 'admin', scheme: 'light', full: true },
+  { name: 'admin-settings', url: '/admin/settings', w: 390, h: 844, who: 'admin', scheme: 'light', full: true },
+  { name: 'admin-settings-desktop', url: '/admin/settings', w: 1280, h: 900, who: 'admin', scheme: 'light' },
   { name: 'qa', url: '/qa', w: 390, h: 844, who: 'student', scheme: 'light', full: true },
   { name: 'qa-new', url: '/qa/new', w: 390, h: 844, who: 'student', scheme: 'light', full: true },
   { name: 'qa-thread', url: '/qa/1', w: 390, h: 844, who: 'student', scheme: 'light', full: true },

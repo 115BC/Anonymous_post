@@ -51,7 +51,7 @@ def _seed(conn):
             (SITE_NAME, INVITE_CODE),
         )
         print(f"[init] 站点名称：{SITE_NAME}")
-        print(f"[init] 注册邀请码：{INVITE_CODE}（可用 flask set-invite 修改）", flush=True)
+        print(f"[init] 注册邀请码：{INVITE_CODE}（可在 管理 → 设置 或 flask set-invite 修改）", flush=True)
 
     if cur.execute("SELECT COUNT(*) FROM users WHERE role = 'superadmin'").fetchone()[0] == 0:
         password = ADMIN_PASSWORD

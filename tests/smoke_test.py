@@ -228,6 +228,20 @@ resp = client.post("/qa/%d/reply" % qa_row["id"], data={
 }, follow_redirects=True)
 assert resp.status_code == 200 and "两个栈" in text(resp)
 
+print("5c. 邀请码设置")
+settings_page = text(client.get("/admin/settings"))
+assert "当前邀请码" in settings_page and "TESTCODE" in settings_page
+admin_token = token_from(settings_page)
+resp = client.post("/admin/settings", data={
+    "_csrf": admin_token, "invite_code": "newcode2027",
+}, follow_redirects=True)
+assert resp.status_code == 200 and "邀请码已更新" in text(resp)
+assert "NEWCODE2027" in text(resp), "邀请码应自动转为大写并立即生效"
+assert db_row("SELECT invite_code FROM site_config WHERE id=1")["invite_code"] == "NEWCODE2027"
+admin_token = token_from(text(client.get("/admin/settings")))
+resp = client.post("/admin/settings", data={"_csrf": admin_token, "invite_code": "ab"})
+assert resp.status_code == 200 and "4–32" in text(resp), "过短的邀请码应被拒绝"
+
 print("6. 雪绒花权限")
 logout(admin_token)
 conn = db.connect()
@@ -255,6 +269,7 @@ assert resp.status_code == 200 and "我在，慢慢说" in text(resp)
 assert client.get("/admin/notices").status_code == 403
 assert client.get("/admin/feedback").status_code == 403
 assert client.get("/admin/resources").status_code == 403
+assert client.get("/admin/settings").status_code == 403
 
 print("7. 作者凭回访码看到双方回复")
 logout(counselor_token)

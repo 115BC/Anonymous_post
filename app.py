@@ -103,6 +103,7 @@ RESOURCE_STATUS = {
 
 CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 USERNAME_RE = re.compile(r"^[\w\u4e00-\u9fa5-]{2,20}$", re.UNICODE)
+INVITE_RE = re.compile(r"^[A-Z0-9_-]{4,32}$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 DUMMY_HASH = generate_password_hash(secrets.token_urlsafe(16))
 thread_serializer = URLSafeSerializer(app.secret_key, salt="classsite-thread")
@@ -1566,6 +1567,29 @@ def admin_user_role(uid):
     return redirect(url_for("admin_users"))
 
 
+# ---------------------------------------------------------------- admin: settings
+
+@app.route("/admin/settings", methods=["GET", "POST"])
+@superadmin_required
+def admin_settings():
+    cfg = get_config()
+    error = None
+    if request.method == "POST":
+        code = (request.form.get("invite_code") or "").strip().upper()
+        if not INVITE_RE.match(code):
+            error = "邀请码需为 4–32 位，只能使用字母、数字、下划线或短横线"
+        elif code == cfg["invite_code"]:
+            flash("邀请码没有变化", "info")
+            return redirect(url_for("admin_settings"))
+        else:
+            conn = get_db()
+            conn.execute("UPDATE site_config SET invite_code = ? WHERE id = 1", (code,))
+            conn.commit()
+            flash("邀请码已更新，旧邀请码立即失效", "ok")
+            return redirect(url_for("admin_settings"))
+    return render_template("admin_settings.html", invite_code=cfg["invite_code"], error=error)
+
+
 # ---------------------------------------------------------------- misc pages
 
 @app.get("/privacy")
@@ -1610,8 +1634,8 @@ def error_500(err):
 def cli_set_invite(code):
     """修改注册邀请码，例如：flask --app app set-invite CLASS2027"""
     code = code.strip().upper()
-    if len(code) < 4:
-        raise click.ClickException("邀请码至少 4 位")
+    if not INVITE_RE.match(code):
+        raise click.ClickException("邀请码需为 4–32 位，只能使用字母、数字、下划线或短横线")
     conn = db.connect()
     conn.execute("UPDATE site_config SET invite_code = ? WHERE id = 1", (code,))
     conn.commit()
